@@ -1,0 +1,43 @@
+pipeline {
+
+    agent {
+        label 'Slave2'
+    }
+
+    tools 
+    {
+        maven 'Maven-3.8.7'
+    }
+
+    stages {
+        stage('SCM-Checkout') {
+            steps {
+                // Get some code from a GitHub repository
+                git 'https://github.com/LoksaiETA/Java-mvn-app2.git'
+
+            }
+			}
+        stage('Build') {
+            steps {
+                // Run Maven on a Unix agent.
+                sh "mvn -Dmaven.test.failure.ignore=true clean package"
+            }
+			}	       
+      stage('Deploy to QA Server') {
+            steps {
+                // Run Maven on a Unix agent.
+                script {
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'QA-Server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '.', remoteDirectorySDF: false, removePrefix: 'target/', sourceFiles: 'target/mvn-hello-world.war')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+                
+             }
+            }  stage('Deploy to UAT Server') {
+            steps {
+                // Run Maven on a Unix agent.
+                script {
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'UAT-Server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '.', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: 'target/', sourceFiles: 'target/mvn-hello-world')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+                }
+                
+            }
+			}	       
+			}			
+    }
