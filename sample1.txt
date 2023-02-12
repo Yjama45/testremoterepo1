@@ -1,0 +1,1 @@
+Checking if it would automatically build
